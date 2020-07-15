@@ -19,6 +19,9 @@ class SharedMemoryManager:
         self.prefix = None
         self.shm_test = None
 
+        self.cache = {}
+        self.write_cache = {}
+
     def init_shm_files(self, shm_ini, shm_shape=None):
 
         self.shm_idx = 0
@@ -54,33 +57,49 @@ class SharedMemoryManager:
         self.init_shm_files(shm_ini, shm_shape)
 
     def write_shm(self, frame):
-        shm_mem = np.ndarray(self.shm_shape, dtype=np.uint8, buffer=self.shm_arr[self.shm_idx].buf)
-        shm_mem[:] = frame[:]
 
-        self._shm_last_frame = self.shm_arr[self.shm_idx]
+        shm_object = self.write_cache.get(self.shm_idx)
+
+        if shm_object is None:
+            # Miss
+            shm_mem = np.ndarray(self.shm_shape, dtype=np.uint8, buffer=self.shm_arr[self.shm_idx].buf)
+            self.write_cache[self.shm_idx] = shm_mem
+            shm_mem[:] = frame[:]
+        else:
+            # Hit
+            shm_object[:] = frame[:]
+            pass
+
+        self._shm_last_frame = self.shm_arr[self.shm_idx].name
         self.shm_idx = (self.shm_idx + 1) % self.shm_file_num
+
+        return self._shm_last_frame
 
     def get_last_frame(self):
         return self._shm_last_frame
 
-    @staticmethod
-    def read_shm(shm_name, shape):
-        existing_shm = shared_memory.SharedMemory(name=shm_name)
-        ret = np.ndarray(shape, dtype=np.uint8, buffer=existing_shm.buf)
-        return ret
+    def read_shm(self, shm_name, shape):
+        """
+        :param shm_name: name of shm
+        :param shape:
+        :return:
+        """
 
-    def read_shm(self, index=-1):
+        # lookup in cache memory
+        shm_obj = self.cache.get(shm_name)
 
-        if index == -1:
-            index = self.shm_idx
-        index = index % self.shm_file_num
+        if shm_obj is None:
+            # Miss cache
+            shm = shared_memory.SharedMemory(name=shm_name)
+            self.cache[shm_name] = shm
+            return shm
+        else:
+            # Hit cache
+            return shm_obj
 
-        ret = np.ndarray(self.shm_shape, dtype=np.uint8, buffer=self.shm_arr[index].buf)
-
-        self._shm_last_frame = self.shm_arr[index]
-        self.shm_idx = (index + 1) % self.shm_file_num
-
-        return ret
+        # XXX : This function return only shm object.
+        # XXX : If you want using with numpy, use follow
+        # ret = np.ndarray(shape, dtype=np.uint8, buffer=shm.buf)
 
     def unlink(self):
         for shm in self.shm_arr:

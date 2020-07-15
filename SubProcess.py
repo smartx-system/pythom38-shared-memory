@@ -32,17 +32,22 @@ class SubProcess(multiprocessing.Process):
                 data = self.mmap.read_mmap('./mmap/mmap/test.mmap_00.mmap', self.shape)
                 print("[MMAP FILE] Read :", time.time() - t0)
 
-            im = Image.fromarray(data)
-            im.save('./test.png')
+                im = Image.fromarray(data)
+                im.save('./test_{}.png'.format(i))
 
             for i in range(16):
+
+                shm_name = "shm_avr_test{}".format(i % 8)
+
                 t0 = time.time()
-                data = self.shm.read_shm(index=i)
+
+                # XXX : Get shared memory buffer by name
+                shm = self.shm.read_shm(shm_name=shm_name, shape=self.shape)
+                data = np.ndarray(self.shape, dtype=np.uint8, buffer=shm.buf)
                 print("[SHM MODUL] Read :", time.time() - t0)
 
-            im = Image.fromarray(data)
-            im.save('./test2.png')
-
+                im = Image.fromarray(data)
+                im.save('./test2_{}.png'.format(i))
 
             return
 

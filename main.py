@@ -24,7 +24,7 @@ if __name__ == '__main__':
 
     for i in range(16):
         t0 = time.time()
-        sp.shm.write_shm(img2)
+        ret = sp.shm.write_shm(img2)
         print("[SHM MODUL] Write :", time.time() - t0)
 
     sp.run()
