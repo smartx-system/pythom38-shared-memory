@@ -24,7 +24,7 @@ class SharedMemoryManager:
         self.cache = {}
         self.write_cache = {}
 
-    def init_shm_files(self, shm_ini, shm_shape=None):
+    def init_shm_files(self, shm_ini, shm_shape=None, force=False):
         """
         Init shm files
         :param shm_ini: ini
@@ -50,8 +50,11 @@ class SharedMemoryManager:
             shm_name = self.prefix + str(i)
             shm_path = os.path.join('/dev/shm/', shm_name)
 
-            if utils.file_exists(shm_path):
+            if force is True and utils.file_exists(shm_path):
                 os.remove(shm_path)
+            elif force is False and utils.file_exists(shm_path):
+                print('The file already exists.')
+                return
 
             shm_size = self.shm_shape[0] * self.shm_shape[1] * self.shm_shape[2]
             shm = shared_memory.SharedMemory(name=shm_name, create=True, size=shm_size)
@@ -103,6 +106,7 @@ class SharedMemoryManager:
         if shm_obj is None:
             # Miss cache
             shm = shared_memory.SharedMemory(name=shm_name)
+            print('shm', shm)
             self.cache[shm_name] = shm
             return shm
         else:

@@ -18,7 +18,7 @@ class SubProcess(multiprocessing.Process):
 
         ini = utils.get_ini_parameters('./config.ini')
         self.mmap = MMapFileManager()
-        self.mmap.init_mmap_files('./', ini['MMAP'], 'mmap')
+        self.mmap.init_mmap_files('/dev/shm/', ini['MMAP'], 'mmap')
 
         self.shm = SharedMemoryManager()
         self.shm.init_shm_files(ini['SHM'])
@@ -41,22 +41,20 @@ class SubProcess(multiprocessing.Process):
     def run(self):
         while True:
 
-            for i in range(1):
-                # temp_image = self.img.copy()
-                temp_image = cv2.imread('/home/minds/1920_1080.jpg')
-                # temp_image = self.add_text(temp_image, str(i))
+            for i in range(100):
+                temp_image = self.img.copy()
+                temp_image = self.add_text(temp_image, str(i))
 
                 t0 = time.time()
                 self.mmap.write_mmap(temp_image)
                 print("[MMAP FILE] Write :", time.time() - t0)
 
-            for i in range(1):
+            for i in range(100000):
 
-                # temp_image = self.img.copy()
-                temp_image = cv2.imread('/home/minds/1920_1080.jpg')
-                # temp_image = self.add_text(temp_image, str(i))
+                temp_image = self.img.copy()
+                temp_image = self.add_text(temp_image, str(i))
 
-                shm_name = "shm_avr_test{}".format(i % 8)
+                shm_name = "shm_avr_test0"
                 print(shm_name)
 
                 t0 = time.time()
@@ -66,5 +64,6 @@ class SubProcess(multiprocessing.Process):
             return
 
     def unlink(self):
+        print('unlink')
         self.shm.unlink()
 

@@ -16,58 +16,54 @@ if __name__ == '__main__':
 
     # sub process
     sp = SubProcess()
-    sp.run()
-        
+    sp.start()
+
     # ini
     ini = utils.get_ini_parameters('./config.ini')
 
     # mmap
+    # INFO : Do not initialize by ini. When you are only reading, just read
     mmap = MMapFileManager()
-    mmap.init_mmap_files('./', ini['MMAP'], 'mmap')
+    # mmap.init_mmap_files('./', ini['MMAP'], 'mmap')
 
     # shm
+    # INFO : Do not initialize by ini. When you are only reading, just read
     shm = SharedMemoryManager()
-    shm.init_shm_files(ini['SHM'])
 
     # shape
     shape = (int(ini['MMAP']['mmap_height']), int(ini['MMAP']['mmap_width']), 3)
 
-    """
     # mmap
-    for i in range(1):
-
-        t0 = time.time()
+    for i in range(100):
 
         # Read
-        data = mmap.read_mmap('./mmap/mmap/test.mmap_00.mmap', shape)
-        print(data)
+        t0 = time.time()
+        data = mmap.read_mmap('/dev/shm/mmap/mmap/test.mmap_00.mmap', shape)
         print('[MMAP FILE] Read :', time.time() - t0)
 
         # Save
         im = Image.fromarray(data)
-        im.save('./mmap_{}.png'.format(i))
+        im.save('./mmap_0.png')
 
     # shm
-    for i in range(1):
+    for i in range(1000):
 
-        shm_name = "shm_avr_test{}".format(i % 8)
-        print(shm_name)
-
-        t0 = time.time()
+        shm_name = "shm_avr_test0"
+        print('shm_name', shm_name)
 
         # Read
+        t0 = time.time()
         s = shm.read_shm(shm_name=shm_name, shape=shape)
         data = np.ndarray(shape, dtype=np.uint8, buffer=s.buf)
         print("[SHM MODUL] Read :", time.time() - t0)
 
         # Save
         im = Image.fromarray(data)
-        im.save('./shm_{}.png'.format(i))
+        im.save('./shm_0.png')
 
-    """
 
     time.sleep(2)
+    print('=== Exit ===')
     sp.unlink()
-    print('close')
     exit()
 
