@@ -1,13 +1,14 @@
 
 import multiprocessing
+import time
+import numpy as np
+import Utils as utils
+import cv2
+
 from MMapFileManager import MMapFileManager
 from SharedMemoryManager import SharedMemoryManager
 from multiprocessing import shared_memory
 from PIL import Image
-
-import time
-import numpy as np
-import Utils as utils
 
 
 class SubProcess(multiprocessing.Process):
@@ -23,33 +24,47 @@ class SubProcess(multiprocessing.Process):
         self.shm.init_shm_files(ini['SHM'])
 
         self.shape = (int(ini['MMAP']['mmap_height']), int(ini['MMAP']['mmap_width']), 3)
+    
+        self.img = cv2.imread('/home/minds/1920_1080.jpg')
+
+    def add_text(self, image, text):
+        x1, y1 = 30, 30
+        ret = cv2.putText(image,
+                          text=text,
+                          org=(x1, y1), 
+                          fontFace=cv2.FONT_HERSHEY_SIMPLEX,
+                          fontScale=1, 
+                          color=(255, 255, 255), 
+                          thickness=2)
+        return ret
 
     def run(self):
         while True:
 
-            for i in range(16):
+            for i in range(1):
+                # temp_image = self.img.copy()
+                temp_image = cv2.imread('/home/minds/1920_1080.jpg')
+                # temp_image = self.add_text(temp_image, str(i))
+
                 t0 = time.time()
-                data = self.mmap.read_mmap('./mmap/mmap/test.mmap_00.mmap', self.shape)
-                print("[MMAP FILE] Read :", time.time() - t0)
+                self.mmap.write_mmap(temp_image)
+                print("[MMAP FILE] Write :", time.time() - t0)
 
-                im = Image.fromarray(data)
-                im.save('./test_{}.png'.format(i))
+            for i in range(1):
 
-            for i in range(16):
+                # temp_image = self.img.copy()
+                temp_image = cv2.imread('/home/minds/1920_1080.jpg')
+                # temp_image = self.add_text(temp_image, str(i))
 
                 shm_name = "shm_avr_test{}".format(i % 8)
+                print(shm_name)
 
                 t0 = time.time()
-
-                # XXX : Get shared memory buffer by name
-                shm = self.shm.read_shm(shm_name=shm_name, shape=self.shape)
-                data = np.ndarray(self.shape, dtype=np.uint8, buffer=shm.buf)
-                print("[SHM MODUL] Read :", time.time() - t0)
-
-                im = Image.fromarray(data)
-                im.save('./test2_{}.png'.format(i))
+                ret = self.shm.write_shm(temp_image)
+                print("[SHM MODUL] Write :", time.time() - t0)
 
             return
 
     def unlink(self):
         self.shm.unlink()
+

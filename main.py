@@ -1,35 +1,73 @@
 
-import cv2
-from SubProcess import SubProcess
-import MMapFileManager
-import time
 import numpy as np
-from multiprocessing import shared_memory
 import os
+import cv2
 import Utils as utils
+import time
+
+from SubProcess import SubProcess
+from MMapFileManager import MMapFileManager
+from multiprocessing import shared_memory
+from SharedMemoryManager import SharedMemoryManager
+from PIL import Image
 
 
 if __name__ == '__main__':
 
-    img = cv2.imread('/home/dkdk/1920_1080.jpg')
-    img2 = cv2.imread('/home/dkdk/1920_1080_2.jpg')
-    img_size = 1080 * 1920 * 3
-
+    # sub process
     sp = SubProcess()
-
-    for i in range(16):
-        t0 = time.time()
-        sp.mmap.write_mmap(img)
-        print('[MMAP FILE] Write :', time.time() - t0)
-
-    for i in range(16):
-        t0 = time.time()
-        ret = sp.shm.write_shm(img2)
-        print("[SHM MODUL] Write :", time.time() - t0)
-
     sp.run()
+        
+    # ini
+    ini = utils.get_ini_parameters('./config.ini')
+
+    # mmap
+    mmap = MMapFileManager()
+    mmap.init_mmap_files('./', ini['MMAP'], 'mmap')
+
+    # shm
+    shm = SharedMemoryManager()
+    shm.init_shm_files(ini['SHM'])
+
+    # shape
+    shape = (int(ini['MMAP']['mmap_height']), int(ini['MMAP']['mmap_width']), 3)
+
+    """
+    # mmap
+    for i in range(1):
+
+        t0 = time.time()
+
+        # Read
+        data = mmap.read_mmap('./mmap/mmap/test.mmap_00.mmap', shape)
+        print(data)
+        print('[MMAP FILE] Read :', time.time() - t0)
+
+        # Save
+        im = Image.fromarray(data)
+        im.save('./mmap_{}.png'.format(i))
+
+    # shm
+    for i in range(1):
+
+        shm_name = "shm_avr_test{}".format(i % 8)
+        print(shm_name)
+
+        t0 = time.time()
+
+        # Read
+        s = shm.read_shm(shm_name=shm_name, shape=shape)
+        data = np.ndarray(shape, dtype=np.uint8, buffer=s.buf)
+        print("[SHM MODUL] Read :", time.time() - t0)
+
+        # Save
+        im = Image.fromarray(data)
+        im.save('./shm_{}.png'.format(i))
+
+    """
 
     time.sleep(2)
     sp.unlink()
     print('close')
+    exit()
 

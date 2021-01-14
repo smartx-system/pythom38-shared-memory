@@ -11,6 +11,7 @@ import time
 class SharedMemoryManager:
     def __init__(self):
 
+        # Init
         self.shm_shape = None
         self.shm_arr = None
         self.shm_file_num = None
@@ -19,10 +20,17 @@ class SharedMemoryManager:
         self.prefix = None
         self.shm_test = None
 
+        # Cache
         self.cache = {}
         self.write_cache = {}
 
     def init_shm_files(self, shm_ini, shm_shape=None):
+        """
+        Init shm files
+        :param shm_ini: ini
+        :param shm_shape: shm shape
+        :return: None
+        """
 
         self.shm_idx = 0
         self.shm_file_num = int(shm_ini['shm_file_num'])
@@ -57,6 +65,11 @@ class SharedMemoryManager:
         self.init_shm_files(shm_ini, shm_shape)
 
     def write_shm(self, frame):
+        """
+        Write shm
+        :param frame: frame
+        :return:
+        """
 
         shm_object = self.write_cache.get(self.shm_idx)
 
@@ -68,7 +81,6 @@ class SharedMemoryManager:
         else:
             # Hit
             shm_object[:] = frame[:]
-            pass
 
         self._shm_last_frame = self.shm_arr[self.shm_idx].name
         self.shm_idx = (self.shm_idx + 1) % self.shm_file_num
@@ -105,3 +117,4 @@ class SharedMemoryManager:
         for shm in self.shm_arr:
             shm.close()
             shm.unlink()
+
