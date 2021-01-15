@@ -24,7 +24,6 @@ if __name__ == '__main__':
     # mmap
     # INFO : Do not initialize by ini. When you are only reading, just read
     mmap = MMapFileManager()
-    # mmap.init_mmap_files('./', ini['MMAP'], 'mmap')
 
     # shm
     # INFO : Do not initialize by ini. When you are only reading, just read
@@ -34,11 +33,11 @@ if __name__ == '__main__':
     shape = (int(ini['MMAP']['mmap_height']), int(ini['MMAP']['mmap_width']), 3)
 
     # mmap
-    for i in range(100):
+    for i in range(8):
 
         # Read
         t0 = time.time()
-        data = mmap.read_mmap('/dev/shm/mmap/mmap/test.mmap_00.mmap', shape)
+        data = mmap.read_mmap('./mmap/mmap/test.mmap_00.mmap', shape)
         print('[MMAP FILE] Read :', time.time() - t0)
 
         # Save
@@ -46,10 +45,9 @@ if __name__ == '__main__':
         im.save('./mmap_0.png')
 
     # shm
-    for i in range(1000):
+    for i in range(8):
 
         shm_name = "shm_avr_test0"
-        print('shm_name', shm_name)
 
         # Read
         t0 = time.time()

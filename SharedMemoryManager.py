@@ -101,20 +101,20 @@ class SharedMemoryManager:
         """
 
         # lookup in cache memory
+        # XXX : If cache is not used, the maximum performance of shm is degraded.
         shm_obj = self.cache.get(shm_name)
 
         if shm_obj is None:
             # Miss cache
             shm = shared_memory.SharedMemory(name=shm_name)
-            print('shm', shm)
             self.cache[shm_name] = shm
             return shm
         else:
             # Hit cache
             return shm_obj
 
-        # XXX : This function return only shm object.
-        # XXX : If you want using with numpy, use follow
+        # INFO : This function return only shm object.
+        # If you want using with numpy, use follow
         # ret = np.ndarray(shape, dtype=np.uint8, buffer=shm.buf)
 
     def unlink(self):

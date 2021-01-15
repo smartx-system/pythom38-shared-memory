@@ -18,7 +18,7 @@ class SubProcess(multiprocessing.Process):
 
         ini = utils.get_ini_parameters('./config.ini')
         self.mmap = MMapFileManager()
-        self.mmap.init_mmap_files('/dev/shm/', ini['MMAP'], 'mmap')
+        self.mmap.init_mmap_files('./', ini['MMAP'], 'mmap')
 
         self.shm = SharedMemoryManager()
         self.shm.init_shm_files(ini['SHM'])
@@ -41,7 +41,7 @@ class SubProcess(multiprocessing.Process):
     def run(self):
         while True:
 
-            for i in range(100):
+            for i in range(16):
                 temp_image = self.img.copy()
                 temp_image = self.add_text(temp_image, str(i))
 
@@ -49,13 +49,12 @@ class SubProcess(multiprocessing.Process):
                 self.mmap.write_mmap(temp_image)
                 print("[MMAP FILE] Write :", time.time() - t0)
 
-            for i in range(100000):
+            for i in range(16):
 
                 temp_image = self.img.copy()
                 temp_image = self.add_text(temp_image, str(i))
 
                 shm_name = "shm_avr_test0"
-                print(shm_name)
 
                 t0 = time.time()
                 ret = self.shm.write_shm(temp_image)
