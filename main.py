@@ -14,12 +14,9 @@ from PIL import Image
 
 if __name__ == '__main__':
 
-    # sub process
+    # sub process (Write process)
     sp = SubProcess()
     sp.start()
-
-    # ini
-    ini = utils.get_ini_parameters('./config.ini')
 
     # mmap
     # INFO : Do not initialize by ini. When you are only reading, just read
@@ -30,24 +27,27 @@ if __name__ == '__main__':
     shm = SharedMemoryManager()
 
     # shape
+    ini = utils.get_ini_parameters('./config.ini')
     shape = (int(ini['MMAP']['mmap_height']), int(ini['MMAP']['mmap_width']), 3)
 
     # mmap
     for i in range(8):
 
+        mmap_name = './mmap/mmap/test.mmap_00.mmap'
+
         # Read
         t0 = time.time()
-        data = mmap.read_mmap('./mmap/mmap/test.mmap_00.mmap', shape)
+        data = mmap.read_mmap(mmap_name, shape)
         print('[MMAP FILE] Read :', time.time() - t0)
 
         # Save
         im = Image.fromarray(data)
-        im.save('./mmap_0.png')
+        # im.save('./mmap_0.png')
 
     # shm
     for i in range(8):
 
-        shm_name = "shm_avr_test0"
+        shm_name = 'shm_avr_test0'
 
         # Read
         t0 = time.time()
@@ -57,7 +57,7 @@ if __name__ == '__main__':
 
         # Save
         im = Image.fromarray(data)
-        im.save('./shm_0.png')
+        # im.save('./shm_0.png')
 
 
     time.sleep(2)

@@ -24,7 +24,7 @@ class SharedMemoryManager:
         self.cache = {}
         self.write_cache = {}
 
-    def init_shm_files(self, shm_ini, shm_shape=None, force=False):
+    def init_shm_files(self, shm_ini, shm_shape=None, force=False) -> None:
         """
         Init shm files
         :param shm_ini: ini
@@ -58,20 +58,22 @@ class SharedMemoryManager:
 
             shm_size = self.shm_shape[0] * self.shm_shape[1] * self.shm_shape[2]
             shm = shared_memory.SharedMemory(name=shm_name, create=True, size=shm_size)
-            # shm = np.ndarray(self.shm_shape, dtype=np.uint8, buffer=shm.buf)
             self.shm_arr.append(shm)
 
-    def check_init_shm(self, shm_ini, shm_shape):
+    def check_init_shm(self, shm_ini, shm_shape) -> None:
+        """
+        check init shm
+        """
         if self.shm_arr and self.shm_shape == shm_shape:
             return
 
         self.init_shm_files(shm_ini, shm_shape)
 
-    def write_shm(self, frame):
+    def write_shm(self, frame) -> str:
         """
         Write shm
         :param frame: frame
-        :return:
+        :return: name of shm
         """
 
         shm_object = self.write_cache.get(self.shm_idx)
@@ -90,13 +92,16 @@ class SharedMemoryManager:
 
         return self._shm_last_frame
 
-    def get_last_frame(self):
+    def get_last_frame(self) -> str:
+        """
+        get last frame
+        """
         return self._shm_last_frame
 
-    def read_shm(self, shm_name, shape):
+    def read_shm(self, shm_name: str, shape) -> shared_memory.SharedMemory:
         """
         :param shm_name: name of shm
-        :param shape:
+        :param shape: 
         :return:
         """
 
@@ -117,7 +122,10 @@ class SharedMemoryManager:
         # If you want using with numpy, use follow
         # ret = np.ndarray(shape, dtype=np.uint8, buffer=shm.buf)
 
-    def unlink(self):
+    def unlink(self) -> None:
+        """
+        unlink shm
+        """
         for shm in self.shm_arr:
             shm.close()
             shm.unlink()
