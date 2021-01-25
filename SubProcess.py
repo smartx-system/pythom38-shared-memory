@@ -29,7 +29,7 @@ class SubProcess(multiprocessing.Process):
 
         # etc
         self.shape = (int(ini['MMAP']['mmap_height']), int(ini['MMAP']['mmap_width']), 3)
-        self.img = cv2.imread('/home/minds/1920_1080.jpg')
+        self.img = cv2.imread('./test/input_1920_1080.jpg')
 
     def add_text(self, image, text: str):
         """
@@ -48,25 +48,27 @@ class SubProcess(multiprocessing.Process):
     def run(self):
 
         while True:
-            for i in range(16):
+            for i in range(4):
                 temp_image = self.img.copy()
                 temp_image = self.add_text(temp_image, str(i))
+                cv2.imwrite('./test/mmap_answer.png', temp_image)
 
                 # Write
                 t0 = time.time()
-                self.mmap.write_mmap(temp_image)
+                self.mmap.write_mmap(temp_image[:,:,::-1])
                 print("[MMAP FILE] Write :", time.time() - t0)
 
-            for i in range(16):
+            for i in range(4):
 
                 temp_image = self.img.copy()
                 temp_image = self.add_text(temp_image, str(i))
+                cv2.imwrite('./test/shm_answer.png', temp_image)
 
                 shm_name = "shm_avr_test0"
 
                 # Write
                 t0 = time.time()
-                ret = self.shm.write_shm(temp_image)
+                ret = self.shm.write_shm(temp_image[:,:,::-1])
                 print("[SHM MODUL] Write :", time.time() - t0)
 
             return

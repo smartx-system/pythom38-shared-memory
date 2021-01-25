@@ -12,11 +12,12 @@ from SharedMemoryManager import SharedMemoryManager
 from PIL import Image
 
 
-if __name__ == '__main__':
+def test_main():
 
     # sub process (Write process)
     sp = SubProcess()
     sp.start()
+    time.sleep(1)
 
     # mmap
     # INFO : Do not initialize by ini. When you are only reading, just read
@@ -31,7 +32,7 @@ if __name__ == '__main__':
     shape = (int(ini['MMAP']['mmap_height']), int(ini['MMAP']['mmap_width']), 3)
 
     # mmap
-    for i in range(8):
+    for i in range(4):
 
         mmap_name = './mmap/mmap/test.mmap_00.mmap'
 
@@ -42,10 +43,10 @@ if __name__ == '__main__':
 
         # Save
         im = Image.fromarray(data)
-        # im.save('./mmap_0.png')
+        im.save('./test/mmap_result.png')
 
     # shm
-    for i in range(8):
+    for i in range(4):
 
         shm_name = 'shm_avr_test0'
 
@@ -57,11 +58,23 @@ if __name__ == '__main__':
 
         # Save
         im = Image.fromarray(data)
-        # im.save('./shm_0.png')
-
+        im.save('./test/shm_result.png')
 
     time.sleep(2)
     print('=== Exit ===')
     sp.unlink()
-    exit()
+
+    # Test mmap
+    answer = cv2.imread('./test/mmap_answer.png')
+    result = cv2.imread('./test/mmap_result.png')
+    assert np.array_equal(answer, result)
+
+    # Test shm
+    answer = cv2.imread('./test/shm_answer.png')
+    result = cv2.imread('./test/shm_result.png')
+    assert np.array_equal(answer, result)
+
+
+if __name__ == '__main__':
+    test_main()
 
